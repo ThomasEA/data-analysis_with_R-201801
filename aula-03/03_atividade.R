@@ -34,7 +34,7 @@ d <- salarios %>%
 d <- d %>%
         arrange(desc(qtde_serv_lot_dif))
 
-head(d, 5) %>% pull(DESCRICAO_CARGO) -> cargos
+head(d, 5) %>% pull(DESCRICAO_CARGO) -> cargos_diferente_lotacao
 
 ## 
 ### # ####
@@ -61,4 +61,12 @@ salarios %>% filter(DESCRICAO_CARGO %in% c("MINISTRO DE PRIMEIRA CLASSE", "ANALI
 ## A função group_by permite múltiplos nomes de variáveis na mesma chamada.
 ## 
 ### # ####
+
+analise_salarios <- salarios %>%
+  mutate(cargo_dif_lot = ORGSUP_LOTACAO != ORGSUP_EXERCICIO) %>%
+  group_by(DESCRICAO_CARGO, cargo_dif_lot) %>%
+  filter(DESCRICAO_CARGO %in% cargos_diferente_lotacao) %>%
+  summarize(qtde_serv = n(), salario_medio = mean(REMUNERACAO_FINAL)) %>%
+  ungroup()
+
 
