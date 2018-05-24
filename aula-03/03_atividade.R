@@ -66,7 +66,16 @@ analise_salarios <- salarios %>%
   mutate(cargo_dif_lot = ORGSUP_LOTACAO != ORGSUP_EXERCICIO) %>%
   group_by(DESCRICAO_CARGO, cargo_dif_lot) %>%
   filter(DESCRICAO_CARGO %in% cargos_diferente_lotacao) %>%
-  summarize(qtde_serv = n(), salario_medio = mean(REMUNERACAO_FINAL)) %>%
+  summarize(
+    media_salario = mean(REMUNERACAO_FINAL),
+    desv_padrao_salario = sd(REMUNERACAO_FINAL),
+    mediana_salario = median(REMUNERACAO_FINAL),
+    desv_abs_mediana_salario = median(abs(REMUNERACAO_FINAL - median(REMUNERACAO_FINAL))),
+    menor_salario = min(REMUNERACAO_FINAL),
+    maior_salario = max(REMUNERACAO_FINAL)
+    ) %>%
   ungroup()
+
+
 
 
