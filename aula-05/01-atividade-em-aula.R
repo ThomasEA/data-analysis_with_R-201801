@@ -102,28 +102,49 @@ print.data.frame(maior_duracao)
 
 # Existem apresentações com duração maior que 3 desvios padrão acima da média? Liste elas
 
+sd_duration_3 <- ted_main$duration %>%
+  sd() * 3
 
+mean_duration <- ted_main$duration %>%
+  mean()
 
+duration_sd <- as.duration(mean_duration + sd_duration_3)
+
+ted_main %>%
+  filter(duration > duration_sd) %>%
+  select(title, 
+         duration) %>%
+  mutate(duration_sd_3 = duration_sd) -> apresentacoes_acima_dp_3
 
 # Calcule os 4 quartis e o IQR da duração das apresentações. Liste as apresentações cuja duração supera 1.5 * o IQR + o terceiro quartil
-
-
-
+quantile(ted_main$duration, probs = seq(0,1,.25)) -> qtl
+iqr <- IQR(ted_main$duration)
+ted_main %>%
+  filter(duration > 1.5 * iqr + qtl[4]) %>%
+  select(title, duration) -> apresentacoes_supera
+print.data.frame(apresentacoes_supera)
 
 # Visualize os 10 quantis da quantidade de visualizações
-
-
-
+quantile(ted_main$views, probs = seq(0.1,1,0.1))
 
 # Compare as seguintes estatísticas descritivas da quantidade de visualizações:
 #   * Média e Mediana. Qual é maior?
+#       R.: A média (433149) é maior que a mediana (294281).
 #   * Desvio Absoluto da Mediana e Desvio Padrão. Qual é maior?
+#       R.: O desvio padrão (~459273) é maior que o desvio absoluto da mediana (141840.5)
 #   * Desvio Absoluto da Mediana e IQR. Quantas vezes o IQR é maior que o Desvio Absoluto da Mediana?
+#       R.: O IQR é 377339, e é aprox. 2.5 vezes maior que o Desvio Absoluto da Mediana
 #   * Com base na média e na mediana, e na razão entre o IQR e o Desvio Absoluto da Mediana, 
 #     você conclui que as quantidades de visualização estão distribuidas de forma simétrica em torno da média?
+#       R.: Acredito que a disposição dos valores de quantidades de visualização não está simétrica. 
+#           Estes se encontram preferencialmente abaixo da média, já que o IQR (medida entre o 1º e 3º quartil) ficou abaixo da média.
+#           O desvio absoluto da mediana para mais (acima da mediana) também ficou ligeiramente acima da média.
 
-
-
+summary(ted_main$views)
+mean_views <- mean(ted_main$views)
+sd_views <- sd(ted_main$views)
+dam_views <- median(abs(ted_main$views - median(ted_main$views)))
+iqr_views <- IQR(ted_main$views)
 
 # Calcule a média, o desvio padrão, a mediana e o IQR da quantidade de línguas dos seguintes grupos:
 #     * 10% de vídeos com maior número de visualizações
@@ -134,8 +155,11 @@ print.data.frame(maior_duracao)
 
 # Determine a quantidade de apresentações por evento cujo nome inicie com TED. Utilize a função str_detect para este filtro
 
-
-
+ted_main %>%
+  group_by(event) %>%
+  summarise(cnt_events = n()) -> ted_events
+  
+ted_events[str_detect(ted_events$event, "TED*"),] -> ted_events
 
 # Determine, por evento cujo nome inicie com TED e que a quantidade de visualizações dos vídeos foi maior que a mediana calculada anteriormente.
 #   * a quantidade de apresentações resultante do filtro, por evento
