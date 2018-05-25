@@ -149,9 +149,24 @@ iqr_views <- IQR(ted_main$views)
 # Calcule a média, o desvio padrão, a mediana e o IQR da quantidade de línguas dos seguintes grupos:
 #     * 10% de vídeos com maior número de visualizações
 #     * 10% de vídeos com menor número de visualizações
+high_views <- ted_main %>%
+  filter(views > quantile(ted_main$views, prob = 0.9)) 
 
+ted_main %>%
+  filter(views < quantile(ted_main$views, prob = 0.1)) -> low_views
 
-
+stats_high_views <- data.frame(mean = mean(high_views$languages),
+                               sd = sd(high_views$languages),
+                               median = median(high_views$languages),
+                               iqr = IQR(high_views$languages))
+stats_low_views <- data.frame(mean = mean(low_views$languages),
+                               sd = sd(low_views$languages),
+                               median = median(low_views$languages),
+                               iqr = IQR(low_views$languages))
+print('10% Maiores Visualizações')
+print.data.frame(stats_high_views)
+print('10% Menores Visualizações')
+print.data.frame(stats_low_views)
 
 # Determine a quantidade de apresentações por evento cujo nome inicie com TED. Utilize a função str_detect para este filtro
 
