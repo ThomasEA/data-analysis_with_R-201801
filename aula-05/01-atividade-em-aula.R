@@ -184,7 +184,19 @@ ted_events[str_detect(ted_events$event, "TED*"),] -> ted_events
 #   * o coeficiente de variação da quantidade de línguas
 ### EXIBA SOMENTE OS EVENTOS COM MAIS DE 10 APRESENTAÇÕES
 
+med_views <- median(ted_main$views)
 
+ted_events <- ted_main[str_detect(ted_main$event, "TED*"),]
+  
+ted_events %>%
+  group_by(event) %>%
+  summarise(ano_evento = min(year(published_date)),
+            qtd_med_linguas = mean(languages),
+            sd_qtd_linguas = sd(languages),
+            cv = sd_qtd_linguas / mean(languages),
+            qtd_views = sum(views)) %>%
+  filter(qtd_views > med_views) %>%
+  ungroup()
 
 
 # Calcule e classifique as seguintes correlações
@@ -205,5 +217,13 @@ ted_events[str_detect(ted_events$event, "TED*"),] -> ted_events
 # e interprete o resultado
 
 
+ted_main %>%
+  group_by(year(film_date)) %>%
+  summarise(med_duracao = median(duration)) -> df_ted_main
 
+cor(x = df_ted_main$`year(film_date)`, y = df_ted_main$med_duracao)
+
+#A correlão entre ano e mediana de duração é -0.24.85896.
+#Apesar de ser NEGATIVA (ir na direção oposta), é considerada Desprezível
+#Isso significa que há praticamente nenhuma relação entre a variável ano de filmagem e  mediana de duração
 
