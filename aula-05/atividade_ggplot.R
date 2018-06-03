@@ -7,16 +7,17 @@ library(Hmisc)
 
 ted_main <- read.csv("aula-05/data/ted_main.csv.gz")
 
-
+summary(ted_main$views)
 
 ted_main %>%
   mutate(ano_publicacao = year(as_datetime(published_date))) %>%
   filter(ano_publicacao >= 2012 & ano_publicacao <= 2017) -> ted_main_transf
   #group_by(event, ano_publicacao) %>%
   #summarise(num_views = sum(views)) -> ted_main_t
-ggplot(ted_main_transf, aes( x = views)) +
-  geom_histogram(bins = 30) +
+ggplot(ted_main_transf, aes( x = views / 1000000)) +
+  geom_histogram(bins = 50) +
   facet_wrap(~ ano_publicacao, ncol = 3) + 
-  labs( x = 'Total de visualizações'
-        )
+  labs( y = 'Total de apresentações',
+        x = 'Visualizações (em milhões)',
+        title = 'Histograma de visualizações facetado por ano')
 
