@@ -66,7 +66,7 @@ ted_main %>%
   head(15) %>%
   select(title, film_date) -> filmes_menor_data_filmagem
 
-head(filmes_menor_data_filmagem, 15)
+filmes_menor_data_filmagem
 
 # Crie um dataframe com a contagem de apresentações por ano de filmagem e visualize todo o seu conteúdo
 
@@ -80,16 +80,22 @@ print.data.frame(apresentacoes_ano)
 
 # Analise os 10 quantis da quantidade de apresentações por ano.
 # Descarte, do data frame de apresentações do TED Talks, aqueles cujo ano de filmagem tiver quantidade de apresentações menor ou igual à quantidade do quarto quantil.
-quantile(apresentacoes_ano$cont, probs = seq(from=0.1, to=1, by=0.1))
+quantil = c(quantile(apresentacoes_ano$cont, probs = seq(from=0.1, to=1, by=0.1)))[4]
 
 ted_main %>%
-  filter(year(film_date) > 2006) -> ted_main
+  group_by(ano = year(film_date)) %>%
+  summarise(cont = n()) %>%
+  ungroup() %>%
+  filter(cont > quantil) %>%
+  select(ano) -> ted_main_quartil
 
-
+ted_main <- ted_main %>%
+  filter(year(film_date) %in% ted_main_quartil$ano)
+  
 # Verifique novamente o resumo dos dados do dataframe
 
 ted_main %>%
-  summary()
+  View()
 
 # Verifique os 10 registros com maior duração.
 
@@ -116,6 +122,8 @@ ted_main %>%
          duration) %>%
   mutate(duration_sd_3 = duration_sd) -> apresentacoes_acima_dp_3
 
+print.data.frame(apresentacoes_acima_dp_3)
+
 # Calcule os 4 quartis e o IQR da duração das apresentações. Liste as apresentações cuja duração supera 1.5 * o IQR + o terceiro quartil
 quantile(ted_main$duration, probs = seq(0,1,.25)) -> qtl
 iqr <- IQR(ted_main$duration)
@@ -129,11 +137,11 @@ quantile(ted_main$views, probs = seq(0.1,1,0.1))
 
 # Compare as seguintes estatísticas descritivas da quantidade de visualizações:
 #   * Média e Mediana. Qual é maior?
-#       R.: A média (433149) é maior que a mediana (294281).
+#       R.: A média.
 #   * Desvio Absoluto da Mediana e Desvio Padrão. Qual é maior?
-#       R.: O desvio padrão (~459273) é maior que o desvio absoluto da mediana (141840.5)
+#       R.: O desvio padrão
 #   * Desvio Absoluto da Mediana e IQR. Quantas vezes o IQR é maior que o Desvio Absoluto da Mediana?
-#       R.: O IQR é 377339, e é aprox. 2.5 vezes maior que o Desvio Absoluto da Mediana
+#       R.: O IQR é 379168, e é aprox. 2.65 vezes maior que o Desvio Absoluto da Mediana
 #   * Com base na média e na mediana, e na razão entre o IQR e o Desvio Absoluto da Mediana, 
 #     você conclui que as quantidades de visualização estão distribuidas de forma simétrica em torno da média?
 #       R.: Acredito que a disposição dos valores de quantidades de visualização não está simétrica. 
@@ -145,6 +153,11 @@ mean_views <- mean(ted_main$views)
 sd_views <- sd(ted_main$views)
 dam_views <- median(abs(ted_main$views - median(ted_main$views)))
 iqr_views <- IQR(ted_main$views)
+
+iqr_n_vezes_maior = iqr_views / dam_views
+
+######### AQUI FALTA CONTINUAR   ##########
+
 
 # Calcule a média, o desvio padrão, a mediana e o IQR da quantidade de línguas dos seguintes grupos:
 #     * 10% de vídeos com maior número de visualizações
@@ -201,6 +214,17 @@ ted_events %>%
 
 # Calcule e classifique as seguintes correlações
 #     * Quantidade de visualizações e Quantidade de línguas
+
+ted_maior10Apresentacoes %>%
+    summarise(correlacao = cor(views, languages)) %>%
+    mutate(case_when(
+        abs(correlacao) >= 0.9 ~ "MUITO FORTE",
+        abs(correlacao) >= 0.7 ~ "FORTE",
+        abs(correlacao) >= 0.5 ~ "MODERADO",
+        abs(correlacao) >= 0.3 ~ "FRACO",
+        abs(correlacao) >= 0.0 ~ "DESPREZÍVEL"
+      ))
+
 #     * Quantidade de visualizações e Duração
 #     * Quantidade de visualizações e Quantidade de Comentários
 #     * Quantidade de Comentários e Quantidade de línguas
