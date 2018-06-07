@@ -243,16 +243,46 @@ ted_events_filt %>%
 
 rbind(c1, c2, c3, c4) %>%
   mutate(classificacao = case_when(
-    abs(corr) >= 0.9 ~ "MUITO FORTE",
-    abs(corr) >= 0.7 ~ "FORTE",
-    abs(corr) >= 0.5 ~ "MODERADO",
-    abs(corr) >= 0.3 ~ "FRACO",
-    abs(corr) >= 0.0 ~ "DESPREZÍVEL"
+    abs(corr) >= 0.9 ~ "Muito Forte",
+    abs(corr) >= 0.7 ~ "Forte",
+    abs(corr) >= 0.5 ~ "Moderado",
+    abs(corr) >= 0.3 ~ "Fraco",
+    abs(corr) >= 0.0 ~ "Desprezível"
   )) %>% View()
 
 # Descarte os vídeos cuja duração seja maior que 3 desvios padrões da média. Calcule novamente as 5 correlações solicitadas
+mean_duration <- as.double(mean(ted_events_filt$duration))
+tres_sd_duration <- as.double(sd(ted_events_filt$duration) * 3)
 
+ted_events_filt <- ted_events_filt %>% 
+  filter(as.double(duration) < mean_duration + tres_sd_duration)
 
+ted_events_filt %>%
+  summarise(corr = cor(views, languages)) %>%
+  mutate(tipo = 'Views x Languages') -> c1
+
+#     * Quantidade de visualizações e Duração
+ted_events_filt %>%
+  summarise(corr = cor(views, duration)) %>%
+  mutate(tipo = 'Views x Duration') -> c2
+#     * Quantidade de visualizações e Quantidade de Comentários
+ted_events_filt %>%
+  summarise(corr = cor(views, comments)) %>%
+  mutate(tipo = 'Views x Comments') -> c3
+
+#     * Quantidade de Comentários e Quantidade de línguas
+ted_events_filt %>%
+  summarise(corr = cor(comments, languages)) %>%
+  mutate(tipo = 'Comments x Languages') -> c4
+
+rbind(c1, c2, c3, c4) %>%
+  mutate(classificacao = case_when(
+    abs(corr) >= 0.9 ~ "Muito Forte",
+    abs(corr) >= 0.7 ~ "Forte",
+    abs(corr) >= 0.5 ~ "Moderado",
+    abs(corr) >= 0.3 ~ "Fraco",
+    abs(corr) >= 0.0 ~ "Desprezível"
+  )) %>% View()
 
 
 # Utilizando o data frame original, crie um dataframe com a mediana da duração dos vídeos por ano de filmagem. Calcule a correlação entre o ano e a mediana da duração
