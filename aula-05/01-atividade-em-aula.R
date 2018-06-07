@@ -225,51 +225,30 @@ ted_events_filt %>%
 
 ted_events_filt %>%
     summarise(corr = cor(views, languages)) %>%
-    mutate(tipo = 'Views x Languages') %>%
-    mutate(classificacao = case_when(
-        abs(corr) >= 0.9 ~ "MUITO FORTE",
-        abs(corr) >= 0.7 ~ "FORTE",
-        abs(corr) >= 0.5 ~ "MODERADO",
-        abs(corr) >= 0.3 ~ "FRACO",
-        abs(corr) >= 0.0 ~ "DESPREZÍVEL"
-      )) -> c1
+    mutate(tipo = 'Views x Languages') -> c1
 
 #     * Quantidade de visualizações e Duração
 ted_events_filt %>%
   summarise(corr = cor(views, duration)) %>%
-  mutate(tipo = 'Views x Duration') %>%
-  mutate(classificacao = case_when(
-    abs(corr) >= 0.9 ~ "MUITO FORTE",
-    abs(corr) >= 0.7 ~ "FORTE",
-    abs(corr) >= 0.5 ~ "MODERADO",
-    abs(corr) >= 0.3 ~ "FRACO",
-    abs(corr) >= 0.0 ~ "DESPREZÍVEL"
-  )) -> c2
+  mutate(tipo = 'Views x Duration') -> c2
 #     * Quantidade de visualizações e Quantidade de Comentários
 ted_events_filt %>%
   summarise(corr = cor(views, comments)) %>%
-  mutate(tipo = 'Views x Comments') %>%
-  mutate(classificacao = case_when(
-    abs(corr) >= 0.9 ~ "MUITO FORTE",
-    abs(corr) >= 0.7 ~ "FORTE",
-    abs(corr) >= 0.5 ~ "MODERADO",
-    abs(corr) >= 0.3 ~ "FRACO",
-    abs(corr) >= 0.0 ~ "DESPREZÍVEL"
-  )) -> c3
+  mutate(tipo = 'Views x Comments') -> c3
 
 #     * Quantidade de Comentários e Quantidade de línguas
 ted_events_filt %>%
   summarise(corr = cor(comments, languages)) %>%
-  mutate(tipo = 'Comments x Languages') %>%
+  mutate(tipo = 'Comments x Languages') -> c4
+
+rbind(c1, c2, c3, c4) %>%
   mutate(classificacao = case_when(
     abs(corr) >= 0.9 ~ "MUITO FORTE",
     abs(corr) >= 0.7 ~ "FORTE",
     abs(corr) >= 0.5 ~ "MODERADO",
     abs(corr) >= 0.3 ~ "FRACO",
     abs(corr) >= 0.0 ~ "DESPREZÍVEL"
-  )) -> c4
-
-rbind(c1, c2, c3, c4) %>% View()
+  )) %>% View()
 
 # Descarte os vídeos cuja duração seja maior que 3 desvios padrões da média. Calcule novamente as 5 correlações solicitadas
 
