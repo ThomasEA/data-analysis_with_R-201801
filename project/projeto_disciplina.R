@@ -42,7 +42,9 @@ print.data.frame(df_3)
 
 #4 # Qual o percentual de pedidos que possuem algum produto dos pares 'corredor + departamento' da atividade anterior?
 
-cnt_pedidos <- merge( merge(df_2, df_3), insta_products, by = "product_id") %>%
+df_corredor_depto <- merge(df_2, df_3)
+
+cnt_pedidos <- merge( df_corredor_depto, insta_products, by = "product_id") %>%
   select(order_id) %>%
   distinct() %>%
   count()
@@ -53,13 +55,31 @@ paste("percentual de pedidos que possuem algum produto dos pares 'corredor + dep
 
 #5 # Crie um novo dataframe de produtos em pedidos retirando aqueles produtos que não estão categorizados (usar resultado das atividades 3 e 4)
 
+prod_ped <- merge(insta_products, df_corredor_depto) %>%
+  filter(aisle_id != 100 | department_id != 21) %>%
+  select(order_id, product_id)
 
 #6 # Crie um dataframe que combine todos os dataframes através das suas chaves de ligação. Para produtos de pedidos, use o dataframe da atividade 4
+   
+full_df <- 
+  merge(prod_ped, products)
+
+full_df <- 
+  merge(full_df, departments)
+
+full_df <- 
+  merge(full_df, aisles)
+
+full_df <- 
+  merge(full_df, insta_orders)
+  
    # Transforme as variáveis user_id, department e aisle em factor
+full_df$user_id <- factor(full_df$user_id)
+full_df$department <- factor(full_df$department)
+full_df$aisle <- factor(full_df$aisle)
    # Transforme a variável order_hour_of_day em um factor ordenado (ordered)
-
+full_df$order_hour_of_day <- factor(full_df$order_hour_of_day, ordered = TRUE)
    # Este dataframe deverá ser utilizado em todas as atividades seguintes
-
 
 #7 # Identifique os 5 horários com maior quantidade de usuários que fizeram pedidos
 
