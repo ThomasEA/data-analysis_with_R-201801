@@ -55,24 +55,18 @@ paste("percentual de pedidos que possuem algum produto dos pares 'corredor + dep
 
 #5 # Crie um novo dataframe de produtos em pedidos retirando aqueles produtos que não estão categorizados (usar resultado das atividades 3 e 4)
 
-prod_ped <- merge(insta_products, df_corredor_depto) %>%
-  filter(aisle_id != 100 | department_id != 21) %>%
-  select(order_id, product_id)
+prod_ped <- insta_products %>%
+  left_join(products, by = "product_id") %>%
+  left_join(departments, by="department_id") %>%
+  left_join(aisles, by="aisle_id") %>%
+  filter(department != "missing" | aisle != "missing")
 
 #6 # Crie um dataframe que combine todos os dataframes através das suas chaves de ligação. Para produtos de pedidos, use o dataframe da atividade 4
    
 full_df <- 
-  merge(prod_ped, products)
+  merge(prod_ped, insta_orders)
 
-full_df <- 
-  merge(full_df, departments)
 
-full_df <- 
-  merge(full_df, aisles)
-
-full_df <- 
-  merge(full_df, insta_orders)
-  
    # Transforme as variáveis user_id, department e aisle em factor
 full_df$user_id <- factor(full_df$user_id)
 full_df$department <- factor(full_df$department)
@@ -85,7 +79,7 @@ full_df$order_hour_of_day <- factor(full_df$order_hour_of_day, ordered = TRUE)
 hr_mais_ped <- full_df %>%
   select(order_id, user_id, order_hour_of_day) %>%
   distinct() %>%
-  group_by(order_hour_of_day) %>%
+  group_by(order_hour_of_day)
 
 top_5_hr <- hr_mais_ped %>%
   group_by(order_hour_of_day) %>%
@@ -108,14 +102,32 @@ top_15_prods %>%
 
 #9 # Calcule a média de vendas por hora destes 15 produtos ao longo do dia,
 full_df %>%
+  filter(product_id %in% as.factor(top_15_prods$product_id))  %>%
+  group_by(order_hour_of_day, product_name) %>%
+  count() %>% View()
+  summarise(Mean = mean(1)) %>% View()
+
+
+full_df %>%
   filter(product_id %in% top_15_prods$product_id) %>%
   group_by(product_id, product_name, order_hour_of_day) %>%
-  count() %>%
-  group_by(product_id, product_name) %>%
-  summarise(med = mean(n)) %>%
+  count() %>% 
+  group_by(order_hour_of_day, product_name) %>%
+  summarise(med_vendas_hora = mean(n)) %>%
   View()
 
-   # e faça um gráfico de linhas mostrando a venda média por hora destes produtos. 
+
+full_df %>%
+  filter(product_id %in% top_15_prods$product_id) %>%
+  group_by(order_hour_of_day, product_name) %>%
+  summarise(med = mean(n)) -> med_vendas_hora
+
+
+   # e faça um gráfico de linhas mostrando a venda média por hora destes produtos.
+
+ggplot(med_vendas_hora, aes(x=order_hour_of_day, y=med)) +
+  geom_line(aes(group=product_name, color=product_name))
+
    # Utilize o nome do produto para legenda da cor da linha.
    # Você consegue identificar algum produto com padrão de venda diferente dos demais? 
 
