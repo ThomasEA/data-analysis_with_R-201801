@@ -82,12 +82,39 @@ full_df$order_hour_of_day <- factor(full_df$order_hour_of_day, ordered = TRUE)
    # Este dataframe deverá ser utilizado em todas as atividades seguintes
 
 #7 # Identifique os 5 horários com maior quantidade de usuários que fizeram pedidos
+hr_mais_ped <- full_df %>%
+  select(order_id, user_id, order_hour_of_day) %>%
+  distinct() %>%
+  group_by(order_hour_of_day) %>%
 
+top_5_hr <- hr_mais_ped %>%
+  group_by(order_hour_of_day) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(5)
+
+top_5_hr %>% View()
 
 #8 # Quais os 15 produtos mais vendidos nestes 5 horários? Identifique os produtos e a quantidade total nestes horários (total geral, não por hora)
+top_15_prods <- full_df %>%
+  filter(order_hour_of_day %in% as.factor(top_5_hr$order_hour_of_day)) %>%
+  group_by(product_id, product_name) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(15) 
 
+top_15_prods %>%
+  View()
 
 #9 # Calcule a média de vendas por hora destes 15 produtos ao longo do dia,
+full_df %>%
+  filter(product_id %in% top_15_prods$product_id) %>%
+  group_by(product_id, product_name, order_hour_of_day) %>%
+  count() %>%
+  group_by(product_id, product_name) %>%
+  summarise(med = mean(n)) %>%
+  View()
+
    # e faça um gráfico de linhas mostrando a venda média por hora destes produtos. 
    # Utilize o nome do produto para legenda da cor da linha.
    # Você consegue identificar algum produto com padrão de venda diferente dos demais? 
