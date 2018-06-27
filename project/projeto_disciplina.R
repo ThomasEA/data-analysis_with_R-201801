@@ -104,15 +104,15 @@ top_15_prods %>%
 full_df %>%
   filter(product_id %in% as.factor(top_15_prods$product_id))  %>%
   group_by(order_hour_of_day, product_name) %>%
-  count() %>% View()
-  summarise(Mean = mean(1)) %>% View()
+  count() %>% 
+  summarise(Mean = mean(n)) %>% View()
 
 
 full_df %>%
   filter(product_id %in% top_15_prods$product_id) %>%
   group_by(product_id, product_name, order_hour_of_day) %>%
   count() %>% 
-  group_by(order_hour_of_day, product_name) %>%
+  group_by(product_id, product_name) %>%
   summarise(med_vendas_hora = mean(n)) %>%
   View()
 
@@ -134,25 +134,74 @@ ggplot(med_vendas_hora, aes(x=order_hour_of_day, y=med)) +
 
 #10 # Calcule as seguintes estatísticas descritivas sobre a quantidade de pedidos por dia, para cada hora do dia. O resultado final deve ser exibido para cada hora do dia:
     # Média, Desvio Padrão, Mediana, Mínimo e Máximo
-    # Considerando os valores calculados, você acredita que a distribuição por hora é gaussiana? 
+est_descr <- 
+  full_df %>%
+    group_by(order_hour_of_day) %>%
+    summarise(mean = mean(order_id), sd = sd(order_id), max = max(order_id), min = min(order_id), cnt = n()) %>% ungroup()
+
+full_df %>%
+  group_by(order_hour_of_day) -> x
+
+# Considerando os valores calculados, você acredita que a distribuição por hora é gaussiana? 
+# R.: Acredito que não é uma distribuição gaussiana ou normal, como é possível verificar através do histograma
+
+#{VALIDAR}
+
+ggplot(x, aes(x=order_hour_of_day)) +
+  geom_histogram(stat = "count" )
 
 
 #11 # Faça um gráfico da média de quantidade de produtos por hora, com 1 desvio padrão para cima e para baixo em forma de gráfico de banda
 
+#{DEPENDE DA QUESTÃO 9}
 
 #12 # Visualize um boxplot da quantidade de pedidos por hora nos 7 dias da semana. O resultado deve ter order_dow como eixo x.
 
+full_df %>%
+  group_by(order_dow) %>%
+  count(order_id) -> dow_group
+
+ggplot(dow_group, aes(x=order_dow, group=order_dow)) +
+  geom_boxplot(aes(y=n)) +
+  scale_x_continuous( breaks = 0:6 ) +
+  scale_y_continuous(labels = scales::format_format(big.mark = ".", decimal.mark=",")) +
+  labs( x = "Dia Semana", y = "Qtde Pedidos")
+
 
 #13 # Identifique, por usuário, o tempo médio entre pedidos
+tempo_med_entre_pedidos <- full_df %>%
+  group_by(user_id) %>%
+  summarise(tempo = mean(days_since_prior_order))
 
 
 #14 # Faça um gráfico de barras com a quantidade de usuários em cada tempo médio calculado
+tempo_med_entre_pedidos %>% 
+  group_by(tempo) %>%
+  count() %>%
+  View()
 
+ggplot(tempo_med_entre_pedidos, aes(x=tempo)) +
+  geom_bar( fill="blue", color = "blue", alpha=0.6 ) +
+  scale_x_continuous() +
+  labs( x = "Tempo médio entre pedidos (em dias)"
+        , y = "Qtde usuarios" )
 
 #15 # Faça um gráfico de barras com a quantidade de usuários em cada número de dias desde o pedido anterior. Há alguma similaridade entre os gráficos das atividades 14 e 15? 
 
 
 #16 # Repita o gráfico da atividade 14 mantendo somente os usuários com no mínimo 5 pedidos. O padrão se mantém?
+
+#{TERMINAR - falta filtrar a quantidade mínima de pedidos}
+full_df %>%
+  group_by(user_id) %>%
+  summarise(tempo = mean(days_since_prior_order))
+
+
+ggplot(tempo_med_entre_pedidos, aes(x=tempo)) +
+  geom_bar( fill="blue", color = "blue", alpha=0.6 ) +
+  scale_x_continuous() +
+  labs( x = "Tempo médio entre pedidos (em dias)"
+        , y = "Qtde usuarios" )
 
 
 #17 # O vetor abaixo lista todos os IDs de bananas maduras em seu estado natural.
