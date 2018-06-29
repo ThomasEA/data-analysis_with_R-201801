@@ -103,38 +103,22 @@ top_15_prods %>%
 #9 # Calcule a média de vendas por hora destes 15 produtos ao longo do dia,
 full_df %>%
   filter(product_id %in% as.factor(top_15_prods$product_id))  %>%
+  group_by(order_dow, order_hour_of_day, product_name) %>%
+  summarise(qtd_vendas = n()) %>%
   group_by(order_hour_of_day, product_name) %>%
-  count() %>% 
-  summarise(med_vendas_hora = mean(n)) %>%
-  View()
-
-
-full_df %>%
-  filter(product_id %in% top_15_prods$product_id) %>%
-  group_by(product_id, product_name, order_hour_of_day) %>%
-  count() %>% 
-  group_by(product_id, product_name) %>%
-  summarise(med_vendas_hora = mean(n)) -> xxx
-  View()
-
-
-full_df %>%
-  filter(product_id %in% top_15_prods$product_id) %>%
-  group_by(order_hour_of_day, product_name) %>%
-  summarise(med = mean(n)) -> med_vendas_hora
-
+  summarise(med_vendas_hora = mean(qtd_vendas)) -> med_vendas_hora
 
    # e faça um gráfico de linhas mostrando a venda média por hora destes produtos.
 
-ggplot(xx, aes(x=order_hour_of_day, y=med_vendas_hora)) +
-  geom_line(aes(group=product_name, color=product_name))
-
-
-ggplot(med_vendas_hora, aes(x=order_hour_of_day, y=med)) +
+ggplot(med_vendas_hora, aes(x=order_hour_of_day, y=med_vendas_hora)) +
   geom_line(aes(group=product_name, color=product_name))
 
    # Utilize o nome do produto para legenda da cor da linha.
    # Você consegue identificar algum produto com padrão de venda diferente dos demais? 
+#Resposta: Geralmente esses produtos possuem um padrão de venda semelhante, apesar de alguns possuirem mais vendas no mesmo
+#horário em que outros possuem poucas vendas. É possível verificar que dois produtos se destacam na venda as 00 horas.
+#Há um decréscimo na venda entre 01 e 04 horas para todos os produtos, bem como um acréscimo após as 06 horas, o pico entre
+#as 10 e 16 horas (aprox), e uma queda nas vendas a partir das 16 horas (aprox).
 
 
 #10 # Calcule as seguintes estatísticas descritivas sobre a quantidade de pedidos por dia, para cada hora do dia. O resultado final deve ser exibido para cada hora do dia:
