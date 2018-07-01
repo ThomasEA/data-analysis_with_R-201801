@@ -132,7 +132,8 @@ full_df %>%
   group_by(order_hour_of_day) -> x
 
 # Considerando os valores calculados, você acredita que a distribuição por hora é gaussiana? 
-# R.: Acredito que não é uma distribuição gaussiana ou normal, como é possível verificar através do histograma
+# R.: Sim, conforme mostra o gráfico, a distribuição é uma gaussiana, 
+#já que possui um pico próximo a média e as extremidades são menores, no formato de sino.
 
 #{VALIDAR}
 
@@ -142,7 +143,19 @@ ggplot(x, aes(x=order_hour_of_day)) +
 
 #11 # Faça um gráfico da média de quantidade de produtos por hora, com 1 desvio padrão para cima e para baixo em forma de gráfico de banda
 
-#{DEPENDE DA QUESTÃO 9}
+full_df %>%
+  group_by(order_dow, order_hour_of_day) %>%
+  summarise(qtd_vendas = n()) %>%
+  group_by(order_hour_of_day) %>%
+  summarise(med = mean(qtd_vendas)) %>%
+  mutate(sd_abaixo = med - 2 * sd(med), 
+         sd_acima = med + 2 * sd(med)) -> summary_product
+
+ggplot(summary_product, aes(x=order_hour_of_day, y=med, ymin=sd_abaixo, ymax=sd_acima, group=1)) +
+  geom_line() + 
+  geom_ribbon(fill = "orange", alpha = 0.5) + 
+  geom_jitter(alpha = .2, height = 0, width = 0.3)
+  
 
 #12 # Visualize um boxplot da quantidade de pedidos por hora nos 7 dias da semana. O resultado deve ter order_dow como eixo x.
 
@@ -176,6 +189,12 @@ ggplot(tempo_med_entre_pedidos, aes(x=tempo)) +
 
 #15 # Faça um gráfico de barras com a quantidade de usuários em cada número de dias desde o pedido anterior. Há alguma similaridade entre os gráficos das atividades 14 e 15? 
 
+ggplot(full_df, aes(x=days_since_prior_order)) +
+  geom_bar( alpha = 0.5, fill="orange", color = "orange" ) +
+  scale_y_continuous(labels = scales::comma_format()) +
+  labs( x = "Nro. dias do pedido anterior", y = "Qtde usuarios" )
+
+#Sim, os gráficos são bem semelhantes
 
 #16 # Repita o gráfico da atividade 14 mantendo somente os usuários com no mínimo 5 pedidos. O padrão se mantém?
 
