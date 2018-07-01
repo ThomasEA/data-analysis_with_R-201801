@@ -1,3 +1,5 @@
+#Everton Thomas, Gustavo Emmel e Michel Batalha
+
 # Descrição dos dados: https://tech.instacart.com/3-million-instacart-orders-open-sourced-d40d29ead6f2
 # Estamos trabalhando com somente uma amostra do total de pedidos. O dataset abaixo não possui 3 milhões de pedidos ;)
 library( tidyverse )
@@ -283,4 +285,18 @@ ggplot(ped_med_hora_semana, aes(x=order_hour_of_day, y=med)) +
         x = 'Hora do dia',
         title = 'Histograma de média de pedidos de bananas por dias da semana')
 #22 # Teste se há diferença nas vendas por hora entre os dias 3 e 4 usando o teste de wilcoxon e utilizando a simulação da aula de testes
+
+wilcox.test(med ~ order_dow, 
+            data = ped_med_hora_semana, 
+            alternative = "two.sided", 
+            subset = order_dow %in% c(3, 4), 
+            conf.int = TRUE)
+
+ped_med_hora_semana %>%
+  filter(order_dow %in% c(3,4)) -> vendas_hora
+
+pairwise.wilcox.test(vendas_hora$med, 
+                     vendas_hora$order_dow, 
+                     p.adjust.method = "BH")
+
 
